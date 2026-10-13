@@ -3,11 +3,12 @@ import type {AccountRecord} from './auth';
 export interface SyncConfig { endpoint:string; }
 export interface SyncResponse { items:PlannerItem[]; cursor:number; full:boolean; serverTime:number; }
 declare const __LIUBAI_SYNC_DEFAULT__:string;
+export function defaultEndpoint():string{return typeof __LIUBAI_SYNC_DEFAULT__==='undefined'?'':__LIUBAI_SYNC_DEFAULT__;}
 declare global { interface Window { daylightDesktop?: { platform:string; account:{get:()=>Promise<AccountRecord|null>;set:(record:AccountRecord)=>Promise<void>}; credentials:{get:()=>Promise<string|null>;set:(token:string)=>Promise<void>;clear:()=>Promise<void>}; }; } }
 export function readConfig():SyncConfig {
   try {
     const raw=localStorage.getItem('liubai.sync');
-    if(!raw)return {endpoint:typeof __LIUBAI_SYNC_DEFAULT__==='undefined'?'':__LIUBAI_SYNC_DEFAULT__};
+    if(!raw)return {endpoint:defaultEndpoint()};
     const saved:unknown=JSON.parse(raw);
     if(!saved || typeof saved!=='object' || !('endpoint' in saved) || typeof saved.endpoint!=='string' || !saved.endpoint)return {endpoint:''};
     return {endpoint:normalizedEndpoint(saved.endpoint)};

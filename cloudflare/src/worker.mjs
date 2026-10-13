@@ -73,12 +73,14 @@ export function validateItem(value, now = Date.now()) {
     invalid('updatedAt must be a positive epoch millisecond integer, no more than five minutes in the future.');
   }
   if(value.createdAt!==undefined&&(!Number.isSafeInteger(value.createdAt)||value.createdAt<=0||value.createdAt>value.updatedAt))invalid('createdAt must be a positive timestamp not later than updatedAt.');
+  if(value.time!==undefined&&value.time!==''&&(typeof value.time!=='string'||!/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value.time)))invalid('time must use HH:mm format.');
   // The order is part of the version tie-break contract; ignore untrusted extra keys.
   return {
     id, title, date: value.date, startTime: value.startTime, endTime: value.endTime,
     category: value.category, notes, completed: value.completed,
     updatedAt: value.updatedAt, deleted: value.deleted,
     ...(value.createdAt===undefined?{}:{createdAt:value.createdAt}),
+    ...(value.time===undefined?{}:{time:value.time}),
   };
 }
 

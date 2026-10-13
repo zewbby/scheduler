@@ -3,6 +3,7 @@ export interface PlannerItem {
   id: string; title: string; date: string; startTime: string; endTime: string;
   category: Category; notes: string; completed: boolean; updatedAt: number; deleted: boolean;
   createdAt?: number;
+  time?: string;
 }
 export const CATEGORIES: {id: Category; label: string; symbol: string}[] = [
   {id: 'work', label: '工作', symbol: '●'}, {id: 'life', label: '生活', symbol: '○'}, {id: 'growth', label: '成长', symbol: '◇'},
@@ -18,6 +19,9 @@ export function monthDays(date: Date): Date[] { return Array.from({length:42}, (
 export function minutes(time: string): number { const [h,m]=time.split(':').map(Number); return h*60+m; }
 export function timeLabel(n: number): string { return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`; }
 export function validDate(date: string): boolean { return /^\d{4}-\d{2}-\d{2}$/.test(date) && dateKey(parseDate(date))===date; }
+export function validTime(time:unknown):time is string{return typeof time==='string'&&/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(time);}
+export function taskTime(item:PlannerItem):string{return item.time!==undefined?item.time:item.startTime;}
+export function taskOrder(a:PlannerItem,b:PlannerItem):number{const byTime=(taskTime(a)||'99:99').localeCompare(taskTime(b)||'99:99');if(byTime)return byTime;if(a.createdAt&&b.createdAt)return a.createdAt-b.createdAt;return a.createdAt?1:b.createdAt?-1:0;}
 export function validItem(value: unknown): value is PlannerItem {
   if (!value || typeof value!=='object') return false;
   const x=value as PlannerItem;
@@ -25,7 +29,8 @@ export function validItem(value: unknown): value is PlannerItem {
     && typeof x.date==='string' && validDate(x.date) && ((x.startTime===''&&x.endTime==='') || (/^([01]\d|2[0-3]):[0-5]\d$/.test(x.startTime) && /^([01]\d|2[0-3]):[0-5]\d$/.test(x.endTime) && minutes(x.endTime)>minutes(x.startTime)))
     && CATEGORIES.some(c=>c.id===x.category) && typeof x.notes==='string' && x.notes.length<=10000
     && typeof x.completed==='boolean' && typeof x.deleted==='boolean' && Number.isSafeInteger(x.updatedAt) && x.updatedAt>0
-    && (x.createdAt===undefined||(Number.isSafeInteger(x.createdAt)&&x.createdAt>0&&x.createdAt<=x.updatedAt));
+    && (x.createdAt===undefined||(Number.isSafeInteger(x.createdAt)&&x.createdAt>0&&x.createdAt<=x.updatedAt))
+    && (x.time===undefined||x.time===''||validTime(x.time));
 }
 export function nextTimestamp(items: PlannerItem[]): number { return Math.max(Date.now(), ...items.map(x=>x.updatedAt+1)); }
 export interface PositionedItem { item: PlannerItem; column: number; columns: number; }

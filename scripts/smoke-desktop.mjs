@@ -34,7 +34,7 @@ try {
     const account=JSON.parse(await readFile(path.join(root,'.local','account.json'),'utf8'));
     await page.getByLabel('登录账号').fill(account.username);
     await page.getByLabel('登录密码').fill(process.env.LIUBAI_TEST_PASSWORD);
-    await page.getByRole('button',{name:'登录日程本'}).click();
+    await page.getByRole('button',{name:'登录',exact:true}).click();
     await page.locator('.app-shell').waitFor({state:'visible'});
   }
 
@@ -59,8 +59,8 @@ try {
     assert.equal(cachedBytes.includes(Buffer.from(process.env.LIUBAI_TEST_PASSWORD)),false,'Plaintext password must never be written.');
     await page.getByRole('button',{name:'设置',exact:true}).click();await page.getByRole('button',{name:'退出登录',exact:true}).click();
     await page.route('**/api/login',route=>route.abort());
-    await page.getByLabel('登录密码').fill('deliberately-wrong-offline-password');await page.getByRole('button',{name:'登录日程本'}).click();await page.getByRole('alert').waitFor();assert.match(await page.getByRole('alert').innerText(),/账号或密码不正确/);
-    await page.getByLabel('登录密码').fill(process.env.LIUBAI_TEST_PASSWORD);await page.getByRole('button',{name:'登录日程本'}).click();await page.locator('.app-shell').waitFor({state:'visible'});
+    await page.getByLabel('登录密码').fill('deliberately-wrong-offline-password');await page.getByRole('button',{name:'登录',exact:true}).click();await page.getByRole('alert').waitFor();assert.match(await page.getByRole('alert').innerText(),/账号或密码不正确/);
+    await page.getByLabel('登录密码').fill(process.env.LIUBAI_TEST_PASSWORD);await page.getByRole('button',{name:'登录',exact:true}).click();await page.locator('.app-shell').waitFor({state:'visible'});
     console.log('Native login passed: Cloudflare authentication, encrypted offline verifier and correct offline password enforcement.');
   }else assert.equal(savedToken,null);
   await page.evaluate(() => window.daylightDesktop.credentials.set('liubai-smoke-test-credential'));

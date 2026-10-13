@@ -1,6 +1,6 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {accountLogin} from '../lib/auth';
-import {nextTimestamp,validDate,type PlannerItem} from '../lib/model';
+import {nextTimestamp,validDate,validTime,type PlannerItem} from '../lib/model';
 import {downloadText,loadData,parseBackup,saveData,type PlannerData} from '../lib/storage';
 import {dateKey} from '../lib/model';
 import {clearToken,getToken,mergeSync,normalizedEndpoint,readConfig,selectSyncBatch,setToken,syncRequest} from '../lib/sync';
@@ -17,10 +17,11 @@ export function usePlanner(initialNotice=''){
  const commit=useCallback((update:(current:PlannerData)=>PlannerData):boolean=>{if(initial.error)return false;const next=update(dataRef.current);try{saveData(next);dataRef.current=next;setData(next);setStorageError('');return true;}catch{setStorageError('本地存储空间不足，修改未保存。请先导出备份后重试。');return false;}},[initial.error]);
  const active=useMemo(()=>data.items.filter(item=>!item.deleted),[data.items]);
  const startOwn=()=>{if(commit(current=>({...current,items:[],pending:[],cursor:0,example:false})))notify('已收起示例，开始自己的待办。');};
- const addTask=(date:string,title:string):boolean=>{const value=title.trim();if(!value||value.length>200||!validDate(date))return false;return commit(current=>{const stamp=nextTimestamp(current.items);const item:PlannerItem={id:crypto.randomUUID(),date,title:value,startTime:'',endTime:'',category:'work',notes:'',completed:false,deleted:false,updatedAt:stamp,createdAt:stamp};return {...current,example:false,items:[...(current.example?[]:current.items),item],pending:[...new Set([...(current.example?[]:current.pending),item.id])]};});};
+ const addTask=(date:string,title:string,time:string):boolean=>{const value=title.trim();if(!value||value.length>200||!validDate(date)||!validTime(time))return false;return commit(current=>{const stamp=nextTimestamp(current.items);const item:PlannerItem={id:crypto.randomUUID(),date,title:value,time,startTime:'',endTime:'',category:'work',notes:'',completed:false,deleted:false,updatedAt:stamp,createdAt:stamp};return {...current,example:false,items:[...(current.example?[]:current.items),item],pending:[...new Set([...(current.example?[]:current.pending),item.id])]};});};
  const updateTask=(id:string,patch:Partial<PlannerItem>):boolean=>commit(current=>({...current,items:current.items.map(item=>item.id===id?{...item,...patch,updatedAt:nextTimestamp(current.items)}:item),pending:current.example?[]:[...new Set([...current.pending,id])]}));
  const toggleTask=(item:PlannerItem)=>updateTask(item.id,{completed:!item.completed});
  const renameTask=(id:string,title:string)=>title.trim().length>0&&title.trim().length<=200?updateTask(id,{title:title.trim()}):false;
+ const setTaskTime=(id:string,time:string)=>time===''||validTime(time)?updateTask(id,{time}):false;
  const deleteTask=(item:PlannerItem)=>{if(updateTask(item.id,{deleted:true})){setUndo(item);notify('待办已删除');}};
  const undoTask=()=>{if(undo&&updateTask(undo.id,{deleted:false})){setUndo(null);notify('待办已恢复');}};
  const runSync=useCallback(async()=>{
@@ -51,5 +52,5 @@ export function usePlanner(initialNotice=''){
  const exportData=()=>{downloadText(JSON.stringify({version:1,exportedAt:new Date().toISOString(),items:dataRef.current.items},null,2),`冲冲冲日程-${dateKey(new Date())}.json`);notify('日程备份已导出');};
  const importData=(text:string)=>{const imported=parseBackup(text);if(commit(current=>{const map=new Map((current.example?[]:current.items).map(x=>[x.id,x]));const changed:string[]=[];for(const item of imported){const old=map.get(item.id);if(!old||item.updatedAt>old.updatedAt||(item.updatedAt===old.updatedAt&&item.deleted&&!old.deleted)){map.set(item.id,item);changed.push(item.id);}}return {...current,example:false,items:[...map.values()],pending:[...new Set([...current.pending,...changed])]};}))notify(`已合并 ${imported.length} 条日程记录`);};
 
- return {data,active,bootError:initial.error,storageError,config,syncStatus,syncing,syncError,toast,undo,startOwn,addTask,toggleTask,renameTask,deleteTask,undoTask,runSync,connect,connectAccount,disconnect,exportData,importData};
+ return {data,active,bootError:initial.error,storageError,config,syncStatus,syncing,syncError,toast,undo,startOwn,addTask,toggleTask,renameTask,setTaskTime,deleteTask,undoTask,runSync,connectAccount,disconnect,exportData,importData};
 }

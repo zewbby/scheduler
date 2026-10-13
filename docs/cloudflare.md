@@ -1,6 +1,6 @@
 # Cloudflare 同步部署
 
-冲冲冲使用本地优先的数据方式：没有网络时仍能新增、修改和完成日程。后端于 2026-10-13 部署到当前授权的 Cloudflare 账号，0.3.0 增加头像接口与 `0002_profile.sql` 迁移。
+冲冲冲使用本地优先的数据方式：没有网络时仍能新增、修改和完成日程。后端于 2026-10-13 部署到当前授权的 Cloudflare 账号，0.3.0 增加头像接口与 `0002_profile.sql` 迁移，0.4.0 支持可选的待办时间标识。继续使用原数据库，时间字段不需要新增迁移。
 
 当前服务：[冲冲冲同步服务](https://liubai-planner-20261013.qiansiwanlv-d64678.workers.dev/api/health)。Worker 与 D1 名称继续沿用 `liubai-planner-20261013`，保留已有数据。服务地址已预置，首次登录需要联网；成功登录后可离线使用。部署元数据保存在 `cloudflare/deployment.json`。
 
@@ -99,8 +99,9 @@ Content-Type: application/json
     "id": "event-20261013-a",
     "title": "阅读与笔记",
     "date": "2026-10-13",
-    "startTime": "20:00",
-    "endTime": "20:45",
+    "time": "20:00",
+    "startTime": "",
+    "endTime": "",
     "category": "growth",
     "notes": "读完一章，记下一个想法。",
     "completed": false,
@@ -110,7 +111,7 @@ Content-Type: application/json
 }
 ```
 
-字段约束：`id` 长度 1–128，仅字母、数字、短横线、下划线；`title` 不可为空，最多 200 字符；`notes` 最多 10000 字符；`category` 仅 `work`、`life`、`growth`。日期必须是有效的 `YYYY-MM-DD`。日卡片待办的 `startTime` 与 `endTime` 都为空；旧时间日程继续接受有效的 24 小时制 `HH:mm` 区间。可选 `createdAt` 用于保持新增顺序，必须不晚于 `updatedAt`。`updatedAt` 为正整数毫秒时间戳，不能超过服务器当前时间五分钟。
+字段约束：`id` 长度 1–128，仅字母、数字、短横线、下划线；`title` 不可为空，最多 200 字符；`notes` 最多 10000 字符；`category` 仅 `work`、`life`、`growth`。日期必须是有效的 `YYYY-MM-DD`。新待办使用 `time` 表示单个时间点，格式为 `HH:mm`，其 `startTime` 与 `endTime` 都为空；`time` 可省略或为空，以兼容旧无时间记录。旧时间日程继续接受有效时间区间。可选 `createdAt` 用于保持新增顺序，必须不晚于 `updatedAt`。`updatedAt` 为正整数毫秒时间戳，不能超过服务器当前时间五分钟。
 
 每次请求最多 250 个不同 ID、请求体最多 2 MiB。更多待发送条目应拆成多批，每批成功后处理服务器结果。`items: []` 可只拉取更新。`since` 为上一轮成功保存的游标，`0` 表示完整拉取。
 
@@ -129,7 +130,7 @@ Content-Type: application/json
 
 合并规则与客户端实现约定：
 
-1. 同一 ID 的较大 `updatedAt` 获胜；相同时间戳时 `deleted: true` 获胜；仍相同时，比较规范化 JSON 的字典顺序，较大值获胜。规范化键顺序为 `id,title,date,startTime,endTime,category,notes,completed,updatedAt,deleted`，所有非 ASCII UTF-16 单元编码为小写 `\uXXXX`。后端 `canonicalPayload()` 实现了该序列化。
+1. 同一 ID 的较大 `updatedAt` 获胜；相同时间戳时 `deleted: true` 获胜；仍相同时，比较规范化 JSON 的字典顺序，较大值获胜。规范化键顺序为 `id,title,date,startTime,endTime,category,notes,completed,updatedAt,deleted`，若存在可选字段则依次追加 `createdAt,time`；所有非 ASCII UTF-16 单元编码为小写 `\uXXXX`。后端 `canonicalPayload()` 实现了该序列化。
 2. 删除是保留全部字段并设置 `deleted: true` 的墓碑记录，不能物理移除。删除时间也要更新。服务器长期保留墓碑，防止久未联网的设备恢复已删除条目。
 3. 请求前记录本次发送版本。成功响应可替换这些准确的旧版本；如果用户在网络请求期间又编辑了本地记录，应保留新编辑，并在下一轮继续上传。
 4. 将服务器合并结果、待同步队列和游标一起持久化，完成后再显示成功。网络失败、鉴权失败、无效响应或存储失败时保留待发送数据，重试相同内容是幂等的。

@@ -7,20 +7,18 @@ import DayCard,{type CardOrigin} from './components/DayCard';
 import {usePlanner} from './hooks/usePlanner';
 import {useAvatar} from './hooks/useAvatar';
 import {avatarUrl} from './lib/avatar';
-import {dateKey,parseDate,type PlannerItem} from './lib/model';
+import {dateKey,parseDate,taskTime,taskOrder,type PlannerItem} from './lib/model';
 import {downloadText,rawBackup} from './lib/storage';
 import './cards.css';
 
 function monthLayout(date:Date){const first=new Date(date.getFullYear(),date.getMonth(),1,12),offset=(first.getDay()+6)%7,count=new Date(date.getFullYear(),date.getMonth()+1,0).getDate();return{offset,count,rows:Math.ceil((offset+count)/7)};}
-function taskOrder(a:PlannerItem,b:PlannerItem){if(a.createdAt&&b.createdAt)return a.createdAt-b.createdAt;if(!a.createdAt&&!b.createdAt)return a.startTime.localeCompare(b.startTime);return a.createdAt?1:-1;}
 function DateTile({day,number,today,items,onOpen}:{day:string;number:number;today:boolean;items:PlannerItem[];onOpen:(day:string,element:HTMLElement)=>void}){
  const ref=useRef<HTMLButtonElement>(null),[capacity,setCapacity]=useState(2);
- useEffect(()=>{const element=ref.current;if(!element)return;const observer=new ResizeObserver(entries=>{const height=entries[0].contentRect.height;setCapacity(Math.max(1,Math.min(3,Math.floor((height-42)/21))));});observer.observe(element);return()=>observer.disconnect();},[]);
- const hint=items.map(item=>`${item.completed?'✓ ':''}${item.title}`).join('\n');
+ useEffect(()=>{const element=ref.current;if(!element)return;const observer=new ResizeObserver(entries=>{const height=entries[0].contentRect.height,available=Math.max(1,Math.floor((height-40)/21));setCapacity(Math.max(1,Math.min(3,items.length>available?Math.floor((height-57)/21):available)));});observer.observe(element);return()=>observer.disconnect();},[items.length]);
+ const hint=items.map(item=>`${item.completed?'✓ ':''}${taskTime(item)?taskTime(item)+' ':''}${item.title}`).join('\n');
  return <button ref={ref} className={`date-card ${today?'is-today':''}`} aria-label={`打开 ${day} 待办卡片`} aria-haspopup="dialog" title={hint||undefined} onClick={event=>onOpen(day,event.currentTarget)}>
   <span className="date-card-heading"><span className="date-number">{String(number).padStart(2,'0')}</span>{today&&<span className="today-dot" aria-label="今天"/>}</span>
-  <span className="date-preview">{items.slice(0,capacity).map(item=><span className={`date-preview-line ${item.completed?'preview-done':''}`} key={item.id}>{item.title}</span>)}</span>
-  {items.length>capacity&&<span className="date-more" aria-label={`还有 ${items.length-capacity} 件待办`} title={items.slice(capacity).map(item=>item.title).join('\n')}>…</span>}
+  <span className="date-preview">{items.slice(0,capacity).map(item=><span className={`date-preview-line ${item.completed?'preview-done':''}`} key={item.id}>{item.title}</span>)}{items.length>capacity&&<span className="date-more" aria-label={`还有 ${items.length-capacity} 件待办`} title={items.slice(capacity).map(item=>item.title).join('\n')}>…</span>}</span>
  </button>;
 }
 export default function CardApp({onLogout,username='',initialNotice=''}:{onLogout:()=>void;username?:string;initialNotice?:string}){
@@ -40,9 +38,9 @@ export default function CardApp({onLogout,username='',initialNotice=''}:{onLogou
    <div className="month-card-grid" style={{gridTemplateRows:`repeat(${rows},minmax(70px,1fr))`}}>{Array.from({length:rows*7},(_,index)=>{const number=index-offset+1;if(number<1||number>count)return <div className="month-space" key={`space-${index}`} aria-hidden="true"/>;const day=`${prefix}-${String(number).padStart(2,'0')}`;return <DateTile key={day} day={day} number={number} today={day===today} items={byDay.get(day)||[]} onOpen={openDay}/>;})}</div>
    <footer className="month-footer"><button className={`planner-sync ${synced?'is-synced':''}`} onClick={()=>setSettings(true)}>{planner.syncing?<LoaderCircle size={18} className="spin"/>:synced?<Check size={17}/>:planner.config.endpoint?<Cloud size={18}/>:<CloudOff size={18}/>}<span>{planner.syncing?'正在同步…':planner.config.endpoint?avatar.pending?'头像待同步':planner.syncStatus:'保存在本机'}</span></button></footer>
   </div>
-  {opened&&<DayCard key={opened.day} day={opened.day} origin={opened.origin} items={byDay.get(opened.day)||[]} onClose={()=>setOpened(null)} onAdd={planner.addTask} onToggle={planner.toggleTask} onRename={planner.renameTask} onDelete={planner.deleteTask} notice={planner.toast||planner.storageError} canUndo={!!planner.undo&&planner.toast==='待办已删除'} onUndo={planner.undoTask}/>}
+  {opened&&<DayCard key={opened.day} day={opened.day} origin={opened.origin} items={byDay.get(opened.day)||[]} onClose={()=>setOpened(null)} onAdd={planner.addTask} onToggle={planner.toggleTask} onRename={planner.renameTask} onTimeChange={planner.setTaskTime} onDelete={planner.deleteTask} notice={planner.toast||planner.storageError} canUndo={!!planner.undo&&planner.toast==='待办已删除'} onUndo={planner.undoTask}/>}
   {avatarOpen&&<AvatarPicker profile={avatar.profile} username={username} onClose={()=>setAvatarOpen(false)} onSelect={avatar.select}/>}
-  {settings&&<Settings config={planner.config} status={planner.syncStatus} onClose={()=>setSettings(false)} onConnect={planner.connect} onAccountConnect={planner.connectAccount} onDisconnect={planner.disconnect} onExport={planner.exportData} onImport={planner.importData} onLogout={onLogout} username={username}/>}
+  {settings&&<Settings config={planner.config} status={planner.syncing?'正在同步…':avatar.pending&&planner.config.endpoint?'头像待同步':planner.syncStatus} onClose={()=>setSettings(false)} onAccountConnect={planner.connectAccount} onDisconnect={planner.disconnect} onExport={planner.exportData} onImport={planner.importData} onLogout={onLogout} username={username}/>}
   {searchOpen&&<Modal title="搜索待办" onClose={()=>{setSearchOpen(false);setQuery('');}} wide><div className="search-field"><Search size={22}/><input data-autofocus autoFocus aria-label="搜索待办名称" placeholder="输入待办名称…" value={query} onChange={e=>setQuery(e.target.value)}/></div><div className="search-results">{results.length?results.slice(0,50).map(item=><button key={item.id} onClick={()=>{setSearchOpen(false);setQuery('');setMonth(parseDate(item.date));openDay(item.date);}}><span><strong className={item.completed?'search-done':''}>{item.title}</strong><small>{item.date}</small></span>{item.completed?<Check size={20}/>:<ArrowRight size={20}/>}</button>):<p>没有找到相关待办。</p>}</div><p className="search-foot">{results.length} 项待办</p></Modal>}
   {planner.toast&&!opened&&<div className="toast" role="status"><Check size={19}/>{planner.toast}</div>}
  </div>;

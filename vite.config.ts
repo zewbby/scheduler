@@ -5,4 +5,5 @@ const accountPath = new URL('./.local/account.json', import.meta.url);
 const account = existsSync(accountPath) ? JSON.parse(readFileSync(accountPath, 'utf8')) : null;
 const deploymentPath = new URL('./cloudflare/deployment.json', import.meta.url);
 const deployment = existsSync(deploymentPath) ? JSON.parse(readFileSync(deploymentPath, 'utf8')) : {endpoint:''};
-export default defineConfig({ plugins: [react()], base: './', define: { __LIUBAI_ACCOUNT_NAME__: JSON.stringify(account?.username||''), __LIUBAI_SYNC_DEFAULT__: JSON.stringify(deployment.endpoint) }, server: { port: 5173, strictPort: true, watch: { ignored: ['**/release/**','**/.artifacts/**','**/.wrangler/**','**/.tools/**'] } } });
+const version=JSON.parse(readFileSync(new URL('./package.json',import.meta.url),'utf8')).version;
+export default defineConfig({ plugins: [react()], base: './', define: { __APP_VERSION__:JSON.stringify(version), __LIUBAI_ACCOUNT_NAME__: JSON.stringify(account?.username||''), __LIUBAI_SYNC_DEFAULT__: JSON.stringify(deployment.endpoint) }, server: { port: 5173, strictPort: true, watch: { ignored: ['**/release/**','**/.artifacts/**','**/.wrangler/**','**/.tools/**'] } } });

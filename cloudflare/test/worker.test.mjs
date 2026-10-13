@@ -46,6 +46,12 @@ function environment() {
   return { DB: new SqliteD1(), SYNC_TOKEN: TOKEN, ALLOWED_ORIGINS: 'http://localhost:5173', ALLOW_FILE_ORIGIN: 'true' };
 }
 test('day-card tasks synchronize without invented times and preserve creation order',async()=>{const env=environment();const original=item({id:'card-task',startTime:'',endTime:'',createdAt:1000});const saved=await sync(env,0,[original]);assert.equal(saved.items[0].startTime,'');assert.equal(saved.items[0].createdAt,1000);const completed=await sync(env,saved.cursor,[{...original,completed:true,updatedAt:2000}]);assert.equal(completed.items[0].createdAt,1000);assert.equal(completed.items[0].completed,true);assert.equal((await worker.fetch(request({since:0,items:[{...original,endTime:'10:00'}]}),env)).status,400);});
+test('single task times survive cloud round-trips, edits and old untimed data',async()=>{
+ const env=environment(),untimed=item({id:'untimed',startTime:'',endTime:''}),timed={...untimed,id:'point-time',time:'09:45'};
+ const saved=await sync(env,0,[untimed,timed]);assert.equal(saved.items.find(x=>x.id==='point-time').time,'09:45');assert.equal(Object.hasOwn(saved.items.find(x=>x.id==='untimed'),'time'),false);
+ const edited=await sync(env,saved.cursor,[{...timed,time:'16:10',updatedAt:2000}]);assert.equal(edited.items[0].time,'16:10');assert.equal((await sync(env,0,[])).items.find(x=>x.id==='point-time').time,'16:10');
+ for(const time of ['24:00','9:00','12:60',42])assert.equal((await worker.fetch(request({since:0,items:[{...timed,time}]}),env)).status,400);
+});
 function accountEnvironment(){const env=environment();const salt=randomBytes(24);env.ACCOUNT_PASSWORD_RECORD=JSON.stringify({version:1,username:'test-user',iterations:10000,salt:salt.toString('base64url'),hash:pbkdf2Sync('testing-password',salt,10000,32,'sha256').toString('base64url')});return env;}
 test('account login returns a sync credential only after verifying username and password',async()=>{
  const env=accountEnvironment();

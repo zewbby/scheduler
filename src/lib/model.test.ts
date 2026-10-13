@@ -1,7 +1,12 @@
 import test from 'node:test';
 test('name-only day tasks accept empty times while retaining legacy timed records',()=>{const legacy=createExamples(new Date())[0];assert.equal(validItem({...legacy,startTime:'',endTime:'',createdAt:legacy.updatedAt}),true);assert.equal(validItem({...legacy,startTime:'',endTime:'10:00'}),false);assert.equal(validItem({...legacy,createdAt:legacy.updatedAt+1}),false);assert.equal(validItem(legacy),true);});
 import assert from 'node:assert/strict';
-import { dateKey,parseDate,addDays,startOfWeek,monthDays,layoutEvents,validItem,createExamples } from './model';
+import { dateKey,parseDate,addDays,startOfWeek,monthDays,layoutEvents,validItem,createExamples,taskTime,taskOrder } from './model';
+test('single time tags coexist with legacy records and sort without moving completed tasks',()=>{
+ const seed=createExamples(new Date())[0],untimed={...seed,id:'old',startTime:'',endTime:''},later={...untimed,id:'late',time:'18:30',createdAt:seed.updatedAt},early={...untimed,id:'early',time:'06:15',completed:true};
+ assert.equal(validItem(later),true);assert.equal(validItem({...later,time:'24:00'}),false);assert.equal(validItem({...later,time:42}),false);assert.equal(validItem({...later,time:''}),true);assert.equal(taskTime(seed),seed.startTime);assert.equal(taskTime(untimed),'');
+ assert.deepEqual([untimed,later,early].sort(taskOrder).map(x=>x.id),['early','late','old']);assert.equal(taskTime({...seed,time:''}),'');
+});
 import { mergeSync,normalizedEndpoint,selectSyncBatch,syncRequest,readConfig } from './sync';
 test('local calendar stays correct across leap days and year boundaries',()=>{assert.equal(dateKey(addDays(parseDate('2024-02-28'),1)),'2024-02-29');assert.equal(dateKey(startOfWeek(parseDate('2026-01-01'))),'2025-12-29');assert.equal(monthDays(parseDate('2026-10-13')).length,42);});
 test('overlapping events receive separate lanes and later events regain width',()=>{const item=createExamples(parseDate('2026-10-13'))[0];const rows=[{...item,id:'a',startTime:'09:00',endTime:'10:00'},{...item,id:'b',startTime:'09:30',endTime:'11:00'},{...item,id:'c',startTime:'11:00',endTime:'12:00'}];const layout=layoutEvents(rows);assert.deepEqual(layout.map(x=>[x.column,x.columns]),[[0,2],[1,2],[0,1]]);});
