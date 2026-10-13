@@ -6,7 +6,7 @@
 
 ## 技术栈
 
-React、TypeScript、Vite、Electron、SVG、Cloudflare Workers、D1。
+React、TypeScript、Vite、Electron、SVG。
 
 ## 安装包
 
