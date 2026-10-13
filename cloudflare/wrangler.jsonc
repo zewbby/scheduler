@@ -1,0 +1,19 @@
+{
+  "name": "liubai-planner-20261013",
+  "account_id": "d64678f84fd94fd99cff21296a11546c",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-10-13",
+  "workers_dev": true,
+  "vars": {
+    "ALLOWED_ORIGINS": "http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,app://liubai,capacitor://localhost,http://localhost,https://localhost",
+    "ALLOW_FILE_ORIGIN": "true"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "liubai-planner-20261013",
+      "database_id": "cb9f2087-6259-49e4-997e-0ee1967ab267",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

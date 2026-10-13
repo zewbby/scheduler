@@ -1,0 +1,12 @@
+import {readFile} from 'node:fs/promises';
+import {randomBytes} from 'node:crypto';
+import {spawn} from 'node:child_process';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('..',import.meta.url));
+const account=JSON.parse(await readFile(path.join(root,'.local','account.json'),'utf8'));
+const secretRecord={ACCOUNT_PASSWORD_RECORD:JSON.stringify(account),SYNC_TOKEN:randomBytes(32).toString('base64url')};
+const cli=path.join(root,'.tools','cloudflare','node_modules','wrangler','bin','wrangler.js');
+const child=spawn(process.execPath,[cli,'secret','bulk','--config',path.join(root,'cloudflare','wrangler.jsonc')],{cwd:root,stdio:['pipe','inherit','inherit']});
+child.stdin.end(JSON.stringify(secretRecord));
+child.on('exit',code=>{process.exitCode=code||0;});

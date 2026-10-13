@@ -1,0 +1,5 @@
+import {chromium} from '@playwright/test';
+import {mkdir} from 'node:fs/promises';
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+await mkdir('.artifacts',{recursive:true});
+try{const page=await browser.newPage({viewport:{width:1440,height:960},timezoneId:'Asia/Shanghai'});await page.addInitScript(()=>{sessionStorage.setItem('liubai.session','test-user');localStorage.setItem('liubai.sync','{"endpoint":""}');});await page.goto('http://127.0.0.1:5173');await page.locator('.date-card').first().waitFor();await page.screenshot({path:'.artifacts/month-vector.png'});await page.locator('.date-card.is-today').click();await page.locator('.day-card-dialog').waitFor();await page.screenshot({path:'.artifacts/day-vector.png',animations:'disabled'});await page.getByRole('button',{name:'关闭卡片'}).click();await page.getByRole('button',{name:'更换头像'}).click();await page.screenshot({path:'.artifacts/avatars-vector.png',animations:'disabled'});console.log('Captured vector month, day card and avatar picker previews.');}finally{await browser.close();}

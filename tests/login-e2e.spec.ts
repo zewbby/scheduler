@@ -1,0 +1,8 @@
+import {test,expect} from '@playwright/test';
+test('login hides planner data, rejects an incorrect password and fits a narrow screen',async({page})=>{
+ await page.route('**/api/login',route=>route.fulfill({status:401,json:{error:{message:'unauthorized'}}}));await page.goto('/');await expect(page.locator('.login-page')).toBeVisible();await expect(page.locator('.app-shell')).toHaveCount(0);await page.screenshot({path:'.artifacts/login-preview.png'});
+ await page.getByLabel('登录账号').fill('test-user');await page.getByLabel('登录密码').fill('a-deliberately-wrong-password');await page.getByRole('button',{name:'登录日程本'}).click();await expect(page.getByRole('alert')).toContainText('账号或密码不正确');await page.getByLabel('登录密码').fill('');await page.setViewportSize({width:390,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('personal account signs in, reloads and signs out',async({page})=>{
+ test.skip(!process.env.LIUBAI_TEST_PASSWORD,'Private credential is supplied only by the hidden QA runner.');await page.goto('/');if(process.env.LIUBAI_TEST_USERNAME)await page.getByLabel('登录账号').fill(process.env.LIUBAI_TEST_USERNAME);await page.getByLabel('登录密码').fill(process.env.LIUBAI_TEST_PASSWORD!);await page.getByRole('button',{name:'登录日程本'}).click();await expect(page.locator('.app-shell')).toBeVisible();await page.reload();await expect(page.locator('.app-shell')).toBeVisible();await page.getByRole('button',{name:'设置',exact:true}).click();await page.getByRole('button',{name:'退出登录',exact:true}).click();await expect(page.locator('.login-page')).toBeVisible();await expect(page.getByLabel('登录密码')).toHaveValue('');
+});
