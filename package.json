@@ -1,7 +1,7 @@
 {
   "name": "liubai-planner",
   "productName": "冲冲冲",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "冲冲冲，一天一张卡片的个人日程本。",
   "author": "zewbby",
@@ -13,7 +13,7 @@
     "build": "tsc -b && vite build",
     "build:icons": "node scripts/build-icon.mjs",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "tsx --test src/lib/*.test.ts && node --test cloudflare/test/*.test.mjs",
+    "test": "tsx --test src/lib/*.test.ts && node --test cloudflare/test/*.test.mjs electron/*.test.cjs",
     "package:win": "pnpm build && electron-builder --win nsis --x64 --config.electronDist=node_modules/electron/dist",
     "package:portable": "pnpm build && electron-builder --win portable --x64 --config.electronDist=node_modules/electron/dist",
     "package:mac": "pnpm build && electron-builder --mac dmg"
@@ -43,6 +43,8 @@
     "asar": true,
     "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "assets/app-icon.ico", "signExecutable": false },
     "nsis": {
+      "include": "build/installer.nsh",
+      "installerLanguages": ["zh_CN", "en_US"],
       "artifactName": "ChongChongChong-Setup-${version}.${ext}",
       "oneClick": false,
       "perMachine": false,

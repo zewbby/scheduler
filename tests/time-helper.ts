@@ -1,0 +1,2 @@
+import type {Page} from '@playwright/test';
+export async function chooseTime(page:Page,label:string,value:string){await page.getByRole('button',{name:label,exact:true}).click();const picker=page.getByRole('dialog',{name:'选择时间',exact:true}),[hour,minute]=value.split(':');await picker.getByRole('listbox',{name:'小时',exact:true}).getByRole('option',{name:hour,exact:true}).click();await picker.getByRole('listbox',{name:'分钟',exact:true}).getByRole('option',{name:minute,exact:true}).click();await picker.getByRole('button',{name:'确定',exact:true}).click();}

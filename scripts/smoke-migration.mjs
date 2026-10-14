@@ -1,0 +1,24 @@
+import {_electron as electron} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('..',import.meta.url)),temporary=path.resolve(await mkdtemp(path.join(os.tmpdir(),'planner-migration-smoke-'))),source=path.join(temporary,'source-profile'),target=path.join(temporary,'迁移目录'),entry=path.join(temporary,'entry.cjs');let application;
+await mkdir(source);await writeFile(entry,`const {app}=require('electron');app.setPath('userData',${JSON.stringify(source)});require(${JSON.stringify(path.join(root,'electron','main.cjs'))});`);
+const environment={...process.env};delete environment.ELECTRON_RUN_AS_NODE;delete environment.DAYLIGHT_DEV_URL;
+const launch=()=>electron.launch({args:[entry],cwd:root,env:environment});
+try{
+ application=await launch();let page=await application.firstWindow();await page.locator('.login-page').waitFor();
+ await page.evaluate(async()=>{const item={id:'migration-task',title:'迁移后保留待办',date:'2026-10-13',time:'09:45',startTime:'',endTime:'',category:'work',notes:'',completed:false,deleted:false,updatedAt:Date.now(),createdAt:Date.now()};item.createdAt=item.updatedAt;localStorage.setItem('liubai.planner.v1',JSON.stringify({version:1,items:[item],pending:[item.id],cursor:9,example:false}));localStorage.setItem('liubai.sync','{"endpoint":""}');localStorage.setItem('liubai.avatar',JSON.stringify({avatarId:'notebook-blue',image:null,updatedAt:1000}));localStorage.setItem('liubai.avatar.pending','true');localStorage.setItem('liubai.preferences',JSON.stringify({language:'en',theme:'dark',accent:'blue'}));sessionStorage.setItem('liubai.session','test-user');await window.daylightDesktop.credentials.set('migration-test-only-credential-0000000000');const salt=new Uint8Array(24);crypto.getRandomValues(salt);const encoded=btoa(String.fromCharCode(...salt)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');await window.daylightDesktop.account.set({version:1,username:'migration-test-user',iterations:10000,salt:encoded,hash:'A'.repeat(43)});});
+ await page.reload();await page.locator('.app-shell').waitFor();const oldInfo=await page.evaluate(()=>window.daylightDesktop.storage.info());assert.equal(path.resolve(oldInfo.path),source);
+ await application.evaluate(({dialog},destination)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[destination]});},target);
+ await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('tab',{name:'Storage',exact:true}).click();await page.getByRole('button',{name:'Change folder',exact:true}).click();await page.getByText(target,{exact:true}).waitFor();
+ await application.evaluate(({app})=>{app.relaunch=()=>{};});await Promise.all([application.waitForEvent('close'),page.getByRole('button',{name:'Restart and migrate',exact:true}).click()]);application=null;
+ // Reopen normally: startup performs the actual migration before Chromium opens its database.
+ application=await launch();page=await application.firstWindow();await page.locator('#root>*').waitFor();
+ const info=await page.evaluate(()=>window.daylightDesktop.storage.info());assert.equal(path.resolve(info.path),target);assert.equal(info.pendingPath,'');
+ const snapshot=await page.evaluate(async()=>({planner:JSON.parse(localStorage.getItem('liubai.planner.v1')),avatar:JSON.parse(localStorage.getItem('liubai.avatar')),preferences:JSON.parse(localStorage.getItem('liubai.preferences')),token:await window.daylightDesktop.credentials.get(),account:await window.daylightDesktop.account.get()}));
+ assert.equal(snapshot.planner.items[0].title,'迁移后保留待办');assert.equal(snapshot.planner.items[0].time,'09:45');assert.deepEqual(snapshot.planner.pending,['migration-task']);assert.equal(snapshot.avatar.avatarId,'notebook-blue');assert.equal(snapshot.preferences.theme,'dark');assert.equal(snapshot.preferences.language,'en');assert.equal(snapshot.token,'migration-test-only-credential-0000000000');assert.equal(snapshot.account.username,'migration-test-user');assert.deepEqual(await readFile(path.join(source,'sync-credential.enc')),await readFile(path.join(target,'sync-credential.enc')));
+ await page.screenshot({path:path.join(root,'.artifacts','storage-migration-boot.png')});console.log('Native migration passed: chosen folder, controlled restart, real LevelDB records, avatar, preferences, outbox and encrypted credentials retained. Original data remains intact.');
+}finally{if(application)await application.close();if(path.dirname(temporary)===path.resolve(os.tmpdir())&&path.basename(temporary).startsWith('planner-migration-smoke-'))await rm(temporary,{recursive:true,force:true,maxRetries:5,retryDelay:300});}

@@ -10,7 +10,9 @@ React、TypeScript、Vite、Electron、SVG。
 
 ## 安装包
 
-[下载 Windows 64 位安装包 · v0.4.0](https://github.com/zewbby/scheduler/releases/download/v0.4.0/ChongChongChong-Setup-0.4.0.exe) · [版本记录](https://github.com/zewbby/scheduler/releases)
+[下载 Windows 64 位安装包 · v0.5.0](https://github.com/zewbby/scheduler/releases/download/v0.5.0/ChongChongChong-Setup-0.5.0.exe) · [版本记录](https://github.com/zewbby/scheduler/releases)
+
+安装时可分别选择软件目录和日程数据目录；升级默认保留原数据。也可在设置「存储」页查看、更换数据位置。
 
 ## 适用系统
 
@@ -18,6 +20,7 @@ Windows 10 / 11，64 位。当前在 Windows 11 验证。macOS、Android 版本�
 
 ## 最近迭代情况
 
+- **0.5.0 · 2026-10-14**：添加成功后自动收起输入框，支持取消草稿；时间改为小时、分钟下拉选择；设置拆分为常规、同步、存储三页，加入中英文、浅色／深色及三种点缀色，移除同步页装饰文案；显示实际离线数据路径，安装和设置中均可更换位置，重启迁移并保留原目录；缩小登录按钮。
 - **0.4.0 · 2026-10-13**：登录页铺满窗口，去掉大外框与多余提示，加入书法标语「梦想的实现是日积月累」，按钮改为「登录」；设置默认只显示同步状态，收起重连表单，移除密钥入口及 Windows 标记；日卡片只保留黑色描边；省略提示紧接任务列表；新增、修改待办时间并按时间排序，完成对勾变绿色。旧待办保留，无时间的可补填。
 - **0.3.0**：更名「冲冲冲」，矢量界面、三个笔记本头像、自定义头像与云端同步、月卡片待办预览、16:9 日卡片、离线登录。
 - **0.2.0**：整月日期卡片、待办添加与完成、账号登录、Cloudflare 同步。

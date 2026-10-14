@@ -4,7 +4,8 @@ export interface SyncConfig { endpoint:string; }
 export interface SyncResponse { items:PlannerItem[]; cursor:number; full:boolean; serverTime:number; }
 declare const __LIUBAI_SYNC_DEFAULT__:string;
 export function defaultEndpoint():string{return typeof __LIUBAI_SYNC_DEFAULT__==='undefined'?'':__LIUBAI_SYNC_DEFAULT__;}
-declare global { interface Window { daylightDesktop?: { platform:string; account:{get:()=>Promise<AccountRecord|null>;set:(record:AccountRecord)=>Promise<void>}; credentials:{get:()=>Promise<string|null>;set:(token:string)=>Promise<void>;clear:()=>Promise<void>}; }; } }
+export interface StorageInfo{path:string;dataPath:string;pendingPath:string;bytes:number;error:string;}
+declare global { interface Window { daylightDesktop?: { platform:string; account:{get:()=>Promise<AccountRecord|null>;set:(record:AccountRecord)=>Promise<void>}; credentials:{get:()=>Promise<string|null>;set:(token:string)=>Promise<void>;clear:()=>Promise<void>}; storage?:{info:()=>Promise<StorageInfo>;open:()=>Promise<void>;choose:(language:string)=>Promise<StorageInfo|null>;cancel:()=>Promise<StorageInfo>;restart:()=>Promise<void>};appearance?:{set:(theme:string)=>Promise<void>}; }; } }
 export function readConfig():SyncConfig {
   try {
     const raw=localStorage.getItem('liubai.sync');

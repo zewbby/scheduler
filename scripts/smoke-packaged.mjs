@@ -12,6 +12,7 @@ try{
  const environment={...process.env};delete environment.ELECTRON_RUN_AS_NODE;delete environment.DAYLIGHT_DEV_URL;
  application=await electron.launch({executablePath:path.join(root,'release','win-unpacked','冲冲冲.exe'),args:[`--user-data-dir=${profile}`],env:environment,cwd:root});
  const page=await application.firstWindow();const errors=[];page.on('pageerror',error=>errors.push(error.message));await page.locator('.login-page').waitFor({state:'visible'});
+ const loginSize=await page.getByRole('button',{name:'登录',exact:true}).boundingBox();assert.ok(loginSize.width<=160&&loginSize.height<=44,'Login button must remain compact.');
  const brushLoaded=await page.evaluate(async()=>{await document.fonts.load('49px PlannerBrush','梦想的实现是日积月累');return [...document.fonts].some(font=>font.family==='PlannerBrush'&&font.status==='loaded');});assert.equal(brushLoaded,true,'Bundled Chinese brush lettering must load offline.');
  const details=await application.evaluate(({app})=>({packaged:app.isPackaged,name:app.getName(),version:app.getVersion(),profile:app.getPath('userData')}));
  const metadata=JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));

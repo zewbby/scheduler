@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain, safeStorage, session, shell, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, safeStorage, session, shell, screen, dialog } = require('electron');
+const {createStorage}=require('./storage.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
@@ -14,11 +15,11 @@ if (isDevelopment && !/^http:\/\/(localhost|127\.0\.0\.1):5173\/?$/.test(rendere
 }
 
 const previousUserData=app.getPath('userData');
-if(!app.commandLine.hasSwitch('user-data-dir')&&['冲冲冲','留白','liubai-planner'].includes(path.basename(previousUserData))){
-  const legacy=path.join(app.getPath('appData'),'留白');
-  const retained=fs.existsSync(legacy)?legacy:path.join(app.getPath('appData'),'liubai-planner');
-  fs.mkdirSync(retained,{recursive:true});app.setPath('userData',retained);
-}
+const isolatedProfile=app.commandLine.hasSwitch('user-data-dir')||!['冲冲冲','留白','liubai-planner'].includes(path.basename(previousUserData));
+const legacy=path.join(app.getPath('appData'),'留白');
+const fallbackProfile=isolatedProfile?previousUserData:fs.existsSync(legacy)?legacy:path.join(app.getPath('appData'),'liubai-planner');
+const storage=createStorage({configPath:isolatedProfile?path.join(previousUserData,'storage-location.ini'):path.join(app.getPath('appData'),'冲冲冲','storage-location.ini'),fallbackPath:fallbackProfile,installationPath:app.isPackaged?path.dirname(app.getPath('exe')):path.resolve(__dirname,'..')});
+app.setPath('userData',storage.info().path);
 app.setName('冲冲冲');
 app.setAppUserModelId('app.liubai.planner');
 let mainWindow;
@@ -58,6 +59,12 @@ function requireEncryption() {
 }
 
 function installCredentialHandlers() {
+  ipcMain.handle('daylight:storage:info',event=>{assertTrustedSender(event);return storage.info();});
+  ipcMain.handle('daylight:storage:open',async event=>{assertTrustedSender(event);const error=await shell.openPath(storage.info().path);if(error)throw new Error(error);});
+  ipcMain.handle('daylight:storage:choose',async(event,language)=>{assertTrustedSender(event);const result=await dialog.showOpenDialog(mainWindow,{title:language==='en'?'Choose an empty data folder':'选择一个空文件夹保存日程数据',defaultPath:storage.info().pendingPath||path.dirname(storage.info().path),properties:['openDirectory','createDirectory','dontAddToRecent']});return result.canceled?null:storage.choose(result.filePaths[0]);});
+  ipcMain.handle('daylight:storage:cancel',event=>{assertTrustedSender(event);return storage.cancel();});
+  ipcMain.handle('daylight:storage:restart',event=>{assertTrustedSender(event);if(!storage.info().pendingPath)throw new Error('请先选择新数据位置。');session.defaultSession.flushStorageData();app.relaunch();setTimeout(()=>app.quit(),100);});
+  ipcMain.handle('daylight:appearance:set',(event,theme)=>{assertTrustedSender(event);if(theme!=='light'&&theme!=='dark')throw new Error('无效的主题。');if(process.platform!=='darwin')mainWindow.setTitleBarOverlay({color:theme==='dark'?'#181b20':'#f7f8fa',symbolColor:theme==='dark'?'#f0f2f6':'#292929'});});
   const accountFilename=()=>path.join(app.getPath('userData'),'account-verifier.enc');
   const validRecord=record=>record&&record.version===1&&typeof record.username==='string'&&record.username.length>0&&record.username.length<=128&&Number.isInteger(record.iterations)&&record.iterations>=10000&&record.iterations<=100000&&/^[A-Za-z0-9_-]{32}$/.test(record.salt)&&/^[A-Za-z0-9_-]{43}$/.test(record.hash);
   ipcMain.handle('daylight:account:get',event=>{assertTrustedSender(event);if(!fs.existsSync(accountFilename()))return null;requireEncryption();const bytes=fs.readFileSync(accountFilename());if(bytes.length>65536)throw new Error('账号缓存无效，请联网重新登录。');const record=JSON.parse(safeStorage.decryptString(bytes));if(!validRecord(record))throw new Error('账号缓存无效，请联网重新登录。');return record;});
@@ -145,6 +152,10 @@ function createWindow() {
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
+  let migrated=false,migrationError='';try{migrated=storage.migratePending();}catch(error){migrationError=error.message;try{storage.cancel();}catch{}}
+  let ownsStorageLock=true;
+  if(migrated){app.releaseSingleInstanceLock();app.setPath('userData',storage.info().path);ownsStorageLock=app.requestSingleInstanceLock();}
+  if(!ownsStorageLock){app.quit();}else{
   app.on('second-instance', () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -153,6 +164,7 @@ if (!app.requestSingleInstanceLock()) {
     }
   });
   app.whenReady().then(() => {
+    if(migrationError)dialog.showErrorBox('数据迁移未完成',migrationError+'\n原目录数据已保留，继续使用原位置。');
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
     session.defaultSession.setPermissionCheckHandler(() => false);
     session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
@@ -178,4 +190,5 @@ if (!app.requestSingleInstanceLock()) {
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
   });
+  }
 }

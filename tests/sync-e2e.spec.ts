@@ -1,4 +1,5 @@
 import {test,expect,type Page,type BrowserContext} from '@playwright/test';
+import {chooseTime} from './time-helper';
 const username='test-user';
 const endpoint='https://planner-e2e.example';const token='isolated-testing-sync-token-1234567890';
 type Item={id:string;title:string;updatedAt:number;deleted:boolean;[key:string]:unknown};
@@ -18,8 +19,8 @@ function service(){
  return {items,attach,profile:()=>profile,setOffline:(value:boolean)=>offline=value,hold:()=>holdNext=true,isHeld:()=>held,release:()=>release()};
 }
 async function open(page:Page){await page.addInitScript(name=>sessionStorage.setItem('liubai.session',name),username);await page.goto('/');await expect(page.locator('.app-shell')).toBeVisible();}
-async function connect(page:Page){await page.getByRole('button',{name:'设置',exact:true}).click();const modal=page.getByRole('dialog',{name:'设置',exact:true});await modal.getByRole('button',{name:'重新连接云端'}).click();await modal.getByLabel('Cloudflare 同步地址').fill(endpoint);await modal.getByLabel('个人账号',{exact:true}).fill(username);await modal.getByLabel('账号密码',{exact:true}).fill('e2e-only-password');await modal.getByRole('button',{name:'连接并同步'}).click();await expect(modal).not.toBeVisible();}
-async function create(page:Page,title:string){if(!(await page.locator('.day-card-dialog').count()))await page.locator('.date-card.is-today').click();await page.getByRole('button',{name:'添加待办',exact:true}).click();await page.getByLabel('待办名称',{exact:true}).fill(title);await page.getByLabel('待办时间',{exact:true}).fill('09:45');await page.getByRole('button',{name:'保存待办',exact:true}).click();await expect(page.locator('.todo-title').filter({hasText:title})).toBeVisible();}
+async function connect(page:Page){await page.getByRole('button',{name:'设置',exact:true}).click();const modal=page.getByRole('dialog',{name:'设置',exact:true});await modal.getByRole('tab',{name:'同步',exact:true}).click();await modal.getByRole('button',{name:'重新连接云端'}).click();await modal.getByLabel('Cloudflare 同步地址').fill(endpoint);await modal.getByLabel('个人账号',{exact:true}).fill(username);await modal.getByLabel('账号密码',{exact:true}).fill('e2e-only-password');await modal.getByRole('button',{name:'连接并同步'}).click();await expect(modal).not.toBeVisible();}
+async function create(page:Page,title:string){if(!(await page.locator('.day-card-dialog').count()))await page.locator('.date-card.is-today').click();await page.getByRole('button',{name:'添加待办',exact:true}).click();await page.getByLabel('待办名称',{exact:true}).fill(title);await chooseTime(page,'待办时间','09:45');await page.getByRole('button',{name:'保存待办',exact:true}).click();await expect(page.locator('.todo-title').filter({hasText:title})).toBeVisible();}
 async function pending(page:Page){return page.evaluate(()=>JSON.parse(localStorage.getItem('liubai.planner.v1')!).pending.length);}
 test('two devices connect by account and exchange events',async({browser})=>{
  const cloud=service();const a=await browser.newContext(),b=await browser.newContext();
