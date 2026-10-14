@@ -13,7 +13,7 @@ try{
  application=await electron.launch({executablePath:path.join(root,'release','win-unpacked','冲冲冲.exe'),args:[`--user-data-dir=${profile}`],env:environment,cwd:root});
  const page=await application.firstWindow();const errors=[];page.on('pageerror',error=>errors.push(error.message));await page.locator('.login-page').waitFor({state:'visible'});
  const loginSize=await page.getByRole('button',{name:'登录',exact:true}).boundingBox();assert.ok(loginSize.width<=160&&loginSize.height<=44,'Login button must remain compact.');
- const artwork=page.locator('.login-art-image');await artwork.waitFor({state:'visible'});await page.waitForFunction(()=>document.querySelector('.login-art-image')?.naturalWidth>0);assert.equal(await artwork.getAttribute('src'),'./illustrations/login-meadow.png','Selected artwork must load from the packaged application.');
+ const artwork=page.locator('.login-art-image');await artwork.waitFor({state:'visible'});await page.waitForFunction(()=>document.querySelector('.login-art-image')?.naturalWidth>0);assert.equal(await artwork.getAttribute('src'),'./illustrations/login-meadow-wide.png','Meadow artwork must load from the packaged application.');
  const brushLoaded=await page.evaluate(async()=>{await document.fonts.load('49px PlannerBrush','梦想的实现是日积月累');return [...document.fonts].some(font=>font.family==='PlannerBrush'&&font.status==='loaded');});assert.equal(brushLoaded,true,'Bundled Chinese brush lettering must load offline.');
  const details=await application.evaluate(({app})=>({packaged:app.isPackaged,name:app.getName(),version:app.getVersion(),profile:app.getPath('userData')}));
  const metadata=JSON.parse(await readFile(path.join(root,'package.json'),'utf8'));

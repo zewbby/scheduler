@@ -15,15 +15,16 @@ export default function AuthApp(){
  const logout=()=>{sessionStorage.removeItem('liubai.session');setSignedIn(false);setPassword('');setError('');};
  if(signedIn)return <App onLogout={logout} username={sessionStorage.getItem('liubai.session')||username} initialNotice={note}/>;
  const seconds=Math.max(0,Math.ceil((lockedUntil-now)/1000));
- return <div className="login-page"><div className="titlebar" aria-hidden="true"/><main className="login-layout">
+ return <div className="login-page"><div className="titlebar" aria-hidden="true"/><main className="login-layout" aria-labelledby="login-motto">
   <section className="login-art" aria-label={t("冲冲冲日程本")}>
-   <img className="login-art-image" src="./illustrations/login-meadow.png" alt="" draggable={false}/>
+   <img className="login-art-image" src="./illustrations/login-meadow-wide.png" alt="" draggable={false}/>
   </section>
-  <section className="login-form-pane"><div className="login-form-wrap"><h2 className="login-motto is-english">Why Not Do It</h2>
+  <h1 id="login-motto" className="login-motto" lang="en">Why Not Do It</h1>
+  <section className="login-form-pane" aria-label={t("登录")}><div className="login-form-wrap">
    <form onSubmit={async event=>{event.preventDefault();if(busy||seconds)return;setBusy(true);setError('');try{setNote(await bootstrapCloudSession(username,password));sessionStorage.setItem('liubai.session',username.trim());setPassword('');failures.current=0;setSignedIn(true);}catch(error){failures.current++;setError(error instanceof Error?error.message:'暂时无法登录，请稍后重试。');if(failures.current>=5){setLockedUntil(Date.now()+30000);setNow(Date.now());failures.current=0;}}finally{setBusy(false);}}}>
     <label>{t("账号")}<div className="login-input"><UserRound size={21}/><input autoComplete="username" aria-label={t("登录账号")} required maxLength={128} value={username} onChange={e=>setUsername(e.target.value)}/></div></label>
     <label>{t("密码")}<div className="login-input"><LockKeyhole size={21}/><input autoComplete="current-password" aria-label={t("登录密码")} autoFocus required maxLength={1024} type={visible?'text':'password'} placeholder={t("输入你的密码")} value={password} onChange={e=>setPassword(e.target.value)}/><button type="button" aria-label={t(visible?'隐藏密码':'显示密码')} onClick={()=>setVisible(!visible)}>{visible?<EyeOff size={21}/>:<Eye size={21}/>}</button></div></label>
-    {error&&<p className="login-error" role="alert">{t(error)}</p>}<button className="login-submit" disabled={busy||seconds>0} type="submit"><span>{t(busy?'正在登录…':seconds?`${seconds} 秒后重试`:'登录')}</span></button>
+    <div className="login-feedback">{error&&<p className="login-error" role="alert">{t(error)}</p>}</div><button className="login-submit" disabled={busy||seconds>0} type="submit"><span>{t(busy?'正在登录…':seconds?`${seconds} 秒后重试`:'登录')}</span></button>
    </form></div></section>
  </main></div>;
 }
