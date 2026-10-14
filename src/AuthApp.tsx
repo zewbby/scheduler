@@ -6,7 +6,7 @@ import {bootstrapCloudSession,cachedAccount,defaultUsername} from './lib/auth';
 import './login.css';
 
 export default function AuthApp(){
- const {t,preferences}=usePreferences();
+ const {t}=usePreferences();
  const [signedIn,setSignedIn]=useState(()=>{try{return !!sessionStorage.getItem('liubai.session');}catch{return false;}});
  const [username,setUsername]=useState(defaultUsername),[password,setPassword]=useState(''),[visible,setVisible]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[note,setNote]=useState('');
  const [lockedUntil,setLockedUntil]=useState(0),[now,setNow]=useState(Date.now()),failures=useRef(0);
@@ -20,7 +20,7 @@ export default function AuthApp(){
    <div className="login-notebooks" aria-hidden="true"><img className="login-book-blue" src="./avatars/notebook-blue.svg" alt=""/><img className="login-book-yellow" src="./avatars/notebook-yellow.svg" alt=""/><img className="login-book-peach" src="./avatars/notebook-peach.svg" alt=""/></div>
    <div className="login-art-copy"><h1>{t("想做的事，")}<br/>{t("一件件搞定。")}</h1><p>{t("一天一张卡片，把生活安排明白。")}</p></div><svg className="login-spark" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 9v16m0 30v16M9 40h16m30 0h16M18 18l12 12m20 20 12 12m0-44L50 30M30 50 18 62" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round"/></svg>
   </section>
-  <section className="login-form-pane"><div className="login-form-wrap"><h2 className={`login-motto ${preferences.language==='en'?'is-english':''}`}>{t("梦想的实现")}<br/>{t("是日积月累")}</h2>
+  <section className="login-form-pane"><div className="login-form-wrap"><h2 className="login-motto is-english">Why Not Do It</h2>
    <form onSubmit={async event=>{event.preventDefault();if(busy||seconds)return;setBusy(true);setError('');try{setNote(await bootstrapCloudSession(username,password));sessionStorage.setItem('liubai.session',username.trim());setPassword('');failures.current=0;setSignedIn(true);}catch(error){failures.current++;setError(error instanceof Error?error.message:'暂时无法登录，请稍后重试。');if(failures.current>=5){setLockedUntil(Date.now()+30000);setNow(Date.now());failures.current=0;}}finally{setBusy(false);}}}>
     <label>{t("账号")}<div className="login-input"><UserRound size={21}/><input autoComplete="username" aria-label={t("登录账号")} required maxLength={128} value={username} onChange={e=>setUsername(e.target.value)}/></div></label>
     <label>{t("密码")}<div className="login-input"><LockKeyhole size={21}/><input autoComplete="current-password" aria-label={t("登录密码")} autoFocus required maxLength={1024} type={visible?'text':'password'} placeholder={t("输入你的密码")} value={password} onChange={e=>setPassword(e.target.value)}/><button type="button" aria-label={t(visible?'隐藏密码':'显示密码')} onClick={()=>setVisible(!visible)}>{visible?<EyeOff size={21}/>:<Eye size={21}/>}</button></div></label>
