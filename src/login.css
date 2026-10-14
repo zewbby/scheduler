@@ -30,24 +30,25 @@
  text-shadow:0 2px 0 #ffffff60;
 }
 .login-form-pane{position:absolute;top:47%;left:50%;width:356px;max-width:calc(100% - 40px);transform:translateX(-50%)}
-.login-form-wrap{padding:16px 22px 17px;background:#fff9e9e8;border:1px solid #fffdf3cc;border-radius:25px;box-shadow:0 5px 18px #55752d12}
-.login-form-wrap form{display:grid;grid-template-columns:minmax(0,1fr);row-gap:10px}
-.login-form-wrap form>label{display:block;color:var(--login-cocoa);font-size:12px;line-height:18px;font-weight:700}
-.login-input{display:flex;align-items:center;gap:10px;margin-top:5px;padding:0 12px;height:44px;background:#fffdf5;border:1.5px solid #90a664;border-radius:12px;color:var(--login-leaf)}
-.login-input:focus-within{border-color:var(--login-leaf);outline:3px solid #e3bf6380;outline-offset:2px}
+.login-form-wrap{padding:10px 12px 17px;background:transparent;border:0;border-radius:0;box-shadow:none}
+.login-form-wrap form{display:grid;grid-template-columns:minmax(0,1fr);row-gap:12px}
+.login-form-wrap form>label{display:block;color:var(--login-cocoa);font-size:14px;line-height:20px;font-weight:700}
+.login-input{position:relative;isolation:isolate;display:flex;align-items:center;gap:10px;margin-top:5px;padding:0 8px;height:44px;background:transparent;border:0;border-bottom:1px solid #75934db3;border-radius:0;color:var(--login-leaf);transition:border-color .15s,box-shadow .15s}
+.login-input::before{content:'';position:absolute;z-index:-1;inset:-5px -7px 0;pointer-events:none;background:radial-gradient(ellipse at center,#fff9e969 0%,#fff9e945 48%,#fff9e900 76%);filter:blur(3px)}
+.login-input:focus-within{border-bottom-color:#48642d;outline:none;box-shadow:0 2px 0 #e3bf6359}
 .login-input>svg{width:18px;height:18px;stroke-width:1.8}
 .login-input input{min-width:0;flex:1;width:100%;padding:10px 0;border:0;outline:none;background:transparent;color:var(--login-cocoa);font-size:15px;line-height:20px;font-weight:600;caret-color:var(--login-leaf)}
 .login-input input:focus{box-shadow:none}
-.login-input input::placeholder{color:#8a8b71;font-weight:400}
+.login-input input::placeholder{color:#646b46;font-weight:400;opacity:1}
 .login-input>button{display:grid;place-items:center;flex-shrink:0;width:32px;height:34px;margin-right:-5px;padding:0;border-radius:8px;color:var(--login-leaf)}
 .login-input>button svg{width:18px;height:18px;stroke-width:1.8}
-.login-input>button:hover{background:#eaf0db}
-.login-page button:focus-visible{outline:3px solid var(--login-leaf);outline-offset:3px}
+.login-input>button:hover{background:#fff9e947}
+.login-page button:focus-visible{outline:2px solid var(--login-leaf);outline-offset:3px}
 .login-feedback{min-height:18px;margin-top:-2px;display:flex;align-items:center;justify-content:center}
 .login-error{color:#8b402d;font-size:11px;font-weight:600;line-height:16px;text-align:center;overflow-wrap:anywhere}
-.login-submit{display:flex;align-items:center;justify-content:center;justify-self:center;width:158px;min-height:42px;margin-top:-3px;padding:9px 14px;border:1.5px solid #a68a42;border-radius:13px;background:#f2ce76;color:var(--login-cocoa);box-shadow:0 3px 0 #c5a650;font-size:14px;font-weight:750;line-height:20px;transition:background .15s,box-shadow .15s,transform .15s}
-.login-submit:hover:not(:disabled){background:#f6d98b;box-shadow:0 4px 0 #c5a650;transform:translateY(-1px)}
-.login-submit:active:not(:disabled){box-shadow:0 1px 0 #c5a650;transform:translateY(2px)}
+.login-submit{display:flex;align-items:center;justify-content:center;justify-self:center;width:158px;min-height:42px;margin-top:-3px;padding:9px 14px;border:0;border-radius:13px;background:#f2ce76eb;color:var(--login-cocoa);box-shadow:0 2px 7px #76622b0a;font-size:14px;font-weight:750;line-height:20px;transition:background .15s,box-shadow .15s,transform .15s}
+.login-submit:hover:not(:disabled){background:#f6d98bf5;box-shadow:0 2px 8px #76622b14;transform:translateY(-1px)}
+.login-submit:active:not(:disabled){background:#eac36beF;box-shadow:none;transform:translateY(0)}
 .login-submit:disabled{opacity:.7;cursor:wait}
 
 /* Preserve the full scene when the window is wider than the illustration. */
