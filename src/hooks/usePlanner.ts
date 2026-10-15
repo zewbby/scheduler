@@ -49,7 +49,7 @@ export function usePlanner(initialNotice=''){
  };
  const disconnect=async()=>{changingSyncConfig.current=true;syncGeneration.current++;try{localStorage.setItem('liubai.sync',JSON.stringify({endpoint:''}));setConfig({endpoint:''});await clearToken();setSyncError('');setSyncStatus('尚未同步');notify('已断开同步，本机日程已保留。');}finally{changingSyncConfig.current=false;}};
  const connectAccount=async(endpoint:string,name:string,password:string)=>{const token=await accountLogin(endpoint,name,password);await connect(endpoint,token);};
- const exportData=()=>{downloadText(JSON.stringify({version:1,exportedAt:new Date().toISOString(),items:dataRef.current.items},null,2),`冲冲冲日程-${dateKey(new Date())}.json`);notify('日程备份已导出');};
+ const exportData=async()=>{if(await downloadText(JSON.stringify({version:1,exportedAt:new Date().toISOString(),items:dataRef.current.items},null,2),`冲冲冲日程-${dateKey(new Date())}.json`))notify('日程备份已导出');};
  const importData=(text:string)=>{const imported=parseBackup(text);if(commit(current=>{const map=new Map((current.example?[]:current.items).map(x=>[x.id,x]));const changed:string[]=[];for(const item of imported){const old=map.get(item.id);if(!old||item.updatedAt>old.updatedAt||(item.updatedAt===old.updatedAt&&item.deleted&&!old.deleted)){map.set(item.id,item);changed.push(item.id);}}return {...current,example:false,items:[...map.values()],pending:[...new Set([...current.pending,...changed])]};}))notify(`已合并 ${imported.length} 条日程记录`);};
 
  return {data,active,bootError:initial.error,storageError,config,syncStatus,syncing,syncError,toast,undo,startOwn,addTask,toggleTask,renameTask,setTaskTime,deleteTask,undoTask,runSync,connectAccount,disconnect,exportData,importData};

@@ -1,0 +1,108 @@
+name: Android and web checks
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+
+jobs:
+  android:
+    name: Android debug APK and lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install pnpm
+        run: |
+          corepack enable
+          corepack install --global pnpm@11.25.0
+          pnpm --version
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run unit tests
+        run: pnpm test
+      - name: Build and copy web assets
+        run: pnpm android:sync
+      - name: Assemble APK and run Android lint
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug lintDebug
+      - name: Calculate APK checksum
+        working-directory: android/app/build/outputs/apk/debug
+        run: sha256sum app-debug.apk > app-debug.apk.sha256
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: ChongChongChong-Android-debug-${{ github.run_number }}
+          path: android/app/build/outputs/apk/debug/app-debug.apk*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload Android lint reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Android-lint-${{ github.run_number }}
+          path: android/app/build/reports/lint-results-debug.*
+          if-no-files-found: ignore
+          retention-days: 14
+
+  web:
+    name: Shared web interface regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install pnpm
+        run: |
+          corepack enable
+          corepack install --global pnpm@11.25.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build shared interface
+        run: pnpm build
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run browser regression tests
+        run: pnpm exec playwright test
+      - name: Upload browser failure details
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Web-test-results-${{ github.run_number }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
