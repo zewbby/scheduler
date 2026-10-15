@@ -75,6 +75,6 @@ interface DaylightDesktop {
 
 Electron 主进程已处理 macOS 窗口关闭与重新激活行为，但本次交付只验证 Windows。macOS 需要在 macOS 上打包、签名和公证。
 
-Android 可复用 React 界面、离线数据模型和同一 Cloudflare Worker，同步协议无需另建。后续可通过 Capacitor 提供 Android 壳，并将凭据存取替换成系统安全存储；Android 包不包含在当前 Windows 交付中。
+0.7.0 已加入 Capacitor Android 工程，共享 React 界面、离线数据模型与同一 Cloudflare Worker。Android 使用系统安全存储保管凭据，提供触屏布局、系统返回键和备份文件导出，详见 [Android 文档](android.md)。当前 Windows 安装包仍为 0.6.0。
 
 实现参考：[Electron 安全指南](https://www.electronjs.org/docs/latest/tutorial/security)、[系统凭据加密](https://www.electronjs.org/docs/latest/api/safe-storage)。

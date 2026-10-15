@@ -1,0 +1,213 @@
+/* The Android app keeps the desktop notebook palette and uses its own touch density. */
+.date-mobile-summary,.todo-more,.todo-menu-title,.todo-menu-cancel{display:none}
+
+@media(pointer:coarse){
+ .todo-more{display:inline-flex;width:44px;height:44px;color:var(--muted)}
+ .todo-check{width:44px;height:44px}
+ .time-trigger{min-height:44px}
+ .time-column button{min-height:44px}
+ .time-actions>button{min-height:44px}
+}
+
+@media(max-width:760px){
+ :root{--calendar-day-min-height:64px;--mobile-safe-top:var(--safe-area-inset-top,env(safe-area-inset-top,0px));--mobile-safe-right:var(--safe-area-inset-right,env(safe-area-inset-right,0px));--mobile-safe-bottom:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));--mobile-safe-left:var(--safe-area-inset-left,env(safe-area-inset-left,0px))}
+ body{overscroll-behavior-y:none}
+ .planner-app>.titlebar{display:none}
+ .month-desk{height:100dvh;padding:calc(var(--mobile-safe-top) + 6px) max(10px,var(--mobile-safe-right)) calc(var(--mobile-safe-bottom) + 6px) max(10px,var(--mobile-safe-left))}
+ .planner-header{min-height:62px;gap:5px}
+ .planner-brand{gap:3px;flex-shrink:0}
+ .planner-brand>img{width:38px;height:38px}
+ .planner-brand strong{font-size:23px}
+ .planner-header-actions{gap:2px;min-width:0}
+ .planner-header-actions>.icon-button{width:44px;height:44px}
+ .planner-account{margin-left:2px}
+ .planner-account-id{display:none}
+ .planner-avatar{width:44px;height:44px;border-radius:11px}
+ .clear-demo{font-size:11px;padding:8px 4px;min-height:44px;max-width:65px;white-space:normal;line-height:1.25}
+ .month-heading{min-height:76px;gap:8px}
+ .month-heading h1{font-size:28px;gap:10px;min-width:0}
+ .month-title-year{font-size:17px}
+ .month-navigation{gap:3px;flex-shrink:0}
+ .month-navigation>div{gap:0}
+ .month-navigation .icon-button{width:44px;height:44px}
+ .month-week-labels{gap:5px;height:30px;font-size:11px}
+ .month-card-grid{gap:6px;padding:0 2px 3px 0;overscroll-behavior:contain;scrollbar-width:thin}
+ .date-card{border-width:1.5px;padding:7px 4px;border-radius:8px;box-shadow:2px 2px 0 var(--shadow)}
+ .date-card-heading{min-height:24px}
+ .date-number{font-size:21px}
+ .date-preview{display:none}
+ .date-mobile-summary{display:flex;flex-direction:column;gap:7px;margin-top:auto;padding-top:4px;min-width:0;color:var(--muted);font-size:11px;line-height:1.25;white-space:nowrap}
+ .date-mobile-summary>span:first-child{overflow:hidden;text-overflow:ellipsis}
+ .is-today .date-mobile-summary{color:var(--on-accent)}
+ .date-mobile-progress{display:flex;gap:3px;min-height:4px}
+ .date-mobile-progress>i{display:block;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.32}
+ .date-mobile-progress>i.is-complete{background:#268551;opacity:1}
+ .today-dot{width:6px;height:6px;flex-shrink:0}
+ .month-footer{height:44px;padding-top:5px}
+ .planner-sync{min-height:38px;font-size:11px;max-width:100%;text-align:left}
+ .planner-sync>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .planner-error{font-size:12px;gap:7px;margin-top:3px}
+ .planner-error>button{min-height:40px;flex-shrink:0}
+
+ .day-card-dialog{width:calc(100vw - var(--mobile-safe-left) - var(--mobile-safe-right) - 20px);height:min(680px,calc(100dvh - var(--mobile-safe-top) - var(--mobile-safe-bottom) - 24px));max-height:calc(100dvh - var(--mobile-safe-top) - var(--mobile-safe-bottom) - 24px);margin:auto;border-radius:17px;aspect-ratio:auto}
+ .day-card-header{padding:14px 15px 12px;gap:10px}
+ .day-card-date{gap:11px}
+ .day-card-date h2{width:50px;height:50px;font-size:31px;border-radius:11px}
+ .day-card-date p{font-size:12px;margin-bottom:5px}
+ .day-card-date strong{font-size:17px}
+ .day-close{width:44px;height:44px}
+ .day-card-body{padding:3px 15px 0;overscroll-behavior:contain;scrollbar-gutter:stable}
+ .todo-line{display:grid;grid-template-columns:minmax(0,1fr) 44px 44px;column-gap:6px;row-gap:0;min-height:94px;padding:9px 0}
+ .todo-title,.todo-edit{grid-column:1;grid-row:1;font-size:16px;line-height:1.55;width:100%;min-height:34px;padding:1px 0}
+ .todo-edit{padding:5px 7px;min-height:40px}
+ .todo-line>.time-picker{grid-column:1;grid-row:2;justify-self:start;max-width:100%}
+ .todo-line .time-trigger.todo-time{min-height:36px;min-width:78px;font-size:13px;padding:7px 9px}
+ .todo-line .time-trigger.todo-time.is-unset{font-size:12px}
+ .todo-more{display:inline-flex;grid-column:2;grid-row:1 / span 2;width:44px;height:44px;color:var(--muted);align-self:center}
+ .todo-more[aria-expanded=true]{background:var(--wash);color:var(--ink)}
+ .todo-check{grid-column:3;grid-row:1 / span 2;width:44px;height:44px;align-self:center;border-radius:11px}
+ .day-empty{min-height:100px}
+ .day-empty img{width:94px;height:94px}
+ .day-empty p{font-size:18px}
+ .day-card-footer{padding:10px 15px 13px;gap:8px}
+ .day-add{width:48px;height:48px;border-radius:14px}
+ .add-todo-form{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:4px 8px;padding:8px 9px 8px 12px}
+ .add-todo-form>input{grid-column:1 / -1;width:100%;min-height:42px;font-size:16px;scroll-margin-block:20px}
+ .add-todo-form>.time-picker{grid-column:1;justify-self:start}
+ .add-todo-form>.time-picker .time-trigger{min-height:44px;border-left:0;padding:7px 0;font-size:14px;gap:7px}
+ .add-todo-form>button{grid-column:2;width:44px;height:44px;border-radius:8px}
+ .day-notice{font-size:12px;line-height:1.6;max-width:100%;overflow-wrap:anywhere}
+ .day-notice>button{min-height:34px;padding:0 6px}
+ .todo-context-menu{left:max(12px,var(--mobile-safe-left))!important;right:max(12px,var(--mobile-safe-right));top:auto!important;bottom:calc(var(--mobile-safe-bottom) + 14px);width:auto;z-index:30;border-radius:15px;padding:8px;box-shadow:0 10px 40px #0003}
+ .todo-menu-title{display:block;font-size:13px;font-weight:650;color:var(--muted);padding:9px 12px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px solid var(--line);margin-bottom:4px}
+ .todo-context-menu>button{min-height:48px;font-size:15px;padding:11px 12px}
+ .todo-context-menu>.todo-delete-action{color:#b34435}
+ :root[data-theme=dark] .todo-context-menu>.todo-delete-action{color:#ffad9d}
+ .todo-context-menu>.todo-menu-cancel{display:block;border-top:1px solid var(--line);border-radius:0;margin-top:4px;color:var(--muted)}
+
+ .modal{max-width:calc(100vw - var(--mobile-safe-left) - var(--mobile-safe-right) - 20px);max-height:calc(100dvh - var(--mobile-safe-top) - var(--mobile-safe-bottom) - 24px);scroll-padding-block:76px 20px;overscroll-behavior:contain}
+ .modal-header{position:sticky;top:0;z-index:2;padding:16px 16px 13px;background:var(--paper);border-radius:14px 14px 0 0}
+ .modal-header .icon-button{width:44px;height:44px}
+ .settings-body{padding:0 16px 18px;min-width:0}
+ .settings-tabs{gap:5px;margin-bottom:14px}
+ .settings-tabs>button{min-height:44px;padding:9px 8px;font-size:14px}
+ .preference-row{min-height:78px;gap:12px;font-size:14px}
+ .preference-row>select{font-size:16px;min-height:44px;min-width:145px;max-width:65%;padding:8px}
+ .theme-switch>button{min-width:66px;min-height:44px;padding:9px 10px}
+ .accent-options{gap:9px}
+ .accent-options>button{width:44px;height:44px}
+ .setting-field input{min-height:48px;font-size:16px;padding:11px}
+ .password-field input{padding-right:54px}
+ .password-field>button{width:42px;height:42px;right:3px;top:3px}
+ .connection-state{font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+ .reconnect-toggle{min-height:48px;font-size:14px}
+ .setting-actions{gap:12px;flex-wrap:wrap}
+ .setting-actions>.primary-button{min-height:46px}
+ .backup-buttons{flex-direction:column;gap:10px}
+ .backup-buttons>button{padding:13px;min-height:68px;gap:12px}
+ .backup-buttons button>span{font-size:14px}
+ .backup-buttons small{font-size:12px}
+ .account-settings{align-items:flex-start;gap:12px;flex-wrap:wrap}
+ .account-settings>span{max-width:100%;overflow-wrap:anywhere;line-height:1.8}
+ .account-settings>.text-button{min-height:44px}
+ .storage-actions{flex-wrap:wrap}
+ .storage-actions>button{min-height:48px;min-width:120px}
+ .storage-pending>div{flex-wrap:wrap}
+ .search-field{margin:3px 16px 12px;padding:11px;min-height:50px}
+ .search-results{max-height:min(390px,calc(100dvh - 210px));padding:0 9px}
+ .search-results>button{min-height:68px}
+ .search-foot{padding:13px 16px}
+ .avatar-picker{padding:3px 16px 18px}
+ .avatar-current{gap:12px;margin-bottom:18px}
+ .avatar-current>div{min-width:0;overflow-wrap:anywhere}
+ .avatar-current p{font-size:13px;line-height:1.6}
+ .avatar-upload{min-height:50px;padding:12px;margin-top:18px}
+ .time-popover{left:max(12px,var(--mobile-safe-left))!important;right:max(12px,var(--mobile-safe-right));top:auto!important;bottom:calc(var(--mobile-safe-bottom) + 14px);width:auto;height:min(332px,calc(100dvh - var(--mobile-safe-top) - var(--mobile-safe-bottom) - 32px));grid-template-rows:minmax(0,1fr) 55px;border-radius:15px;padding:13px 18px 10px;z-index:40}
+ .time-column{gap:8px;overflow:hidden}
+ .time-column>strong{font-size:13px}
+ .time-column>[role=listbox]{overscroll-behavior:contain;scroll-padding-block:10px}
+ .time-column button{min-height:44px;font-size:17px}
+ .time-actions{align-items:center;margin-top:7px;padding-top:5px}
+ .time-actions>button{min-height:44px;min-width:80px;font-size:14px;padding:9px 16px}
+ .toast{max-width:calc(100vw - 28px);bottom:calc(var(--mobile-safe-bottom) + 18px);white-space:normal;text-align:center;line-height:1.7}
+ .recovery{padding:calc(var(--mobile-safe-top) + 24px) 22px calc(var(--mobile-safe-bottom) + 24px);overflow:auto;text-align:center}
+ .recovery h1{font-size:24px}
+
+ .login-page>.titlebar{display:none}
+ .login-layout{height:auto;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:clamp(110px,26dvh,230px);padding:calc(var(--mobile-safe-top) + 38px) max(18px,var(--mobile-safe-right)) calc(var(--mobile-safe-bottom) + 40px) max(18px,var(--mobile-safe-left));overflow:visible}
+ .login-art-image{object-position:50% 45%}
+ .login-motto{position:static;top:auto;padding:0;font-size:34px;line-height:1.15;letter-spacing:-1.2px}
+ .login-form-pane{position:static;top:auto;left:auto;width:342px;max-width:100%;transform:none}
+ .login-form-wrap{padding:22px 22px 20px;border-radius:20px;background:#fff9e9e8;border:1px solid #fff9e9b3;box-shadow:0 8px 24px #54332112;backdrop-filter:blur(6px)}
+ .login-form-wrap form{row-gap:14px}
+ .login-form-wrap form>label{font-size:14px}
+ .login-input{height:48px;margin-top:4px}
+ .login-input input{font-size:16px;padding:12px 0;scroll-margin-block:24px}
+ .login-input>button{width:44px;height:44px}
+ .login-input::before{display:none}
+ .login-feedback{min-height:18px}
+ .login-error{font-size:12px;line-height:1.6}
+ .login-submit{width:100%;min-height:48px;margin-top:0;font-size:15px;border-radius:12px}
+}
+
+@media(max-width:380px){
+ .planner-brand>img{width:32px;height:32px}
+ .planner-brand strong{font-size:20px}
+ .planner-header-actions{gap:0}
+ .planner-account{margin-left:0}
+ .month-heading h1{font-size:25px;gap:6px}
+ .month-title-year{font-size:15px}
+ .month-navigation{gap:0}
+ .date-number{font-size:19px}
+ .date-card{padding:6px 3px}
+ .month-week-labels{font-size:10px}
+ .todo-line{column-gap:4px}
+ .day-card-header,.day-card-body,.day-card-footer{padding-left:12px;padding-right:12px}
+}
+
+@media(max-width:760px) and (max-height:520px){
+ .month-desk{padding-top:var(--mobile-safe-top);padding-bottom:var(--mobile-safe-bottom)}
+ .planner-header{min-height:50px}
+ .month-heading{min-height:54px}
+ .month-week-labels{height:24px}
+ .month-footer{height:36px}
+ .day-card-header{padding-top:8px;padding-bottom:8px}
+ .day-card-date h2{width:42px;height:42px;font-size:28px}
+ .day-card-date p{margin-bottom:3px}
+ .day-card-footer{padding-top:7px;padding-bottom:8px;gap:5px}
+ .day-card-footer:has(.add-todo-form) .day-add{width:40px;height:40px;border-radius:11px}
+ .day-empty img{width:62px;height:62px}
+ .day-empty p{font-size:16px}
+ .login-layout{justify-content:flex-start;padding-top:calc(var(--mobile-safe-top) + 20px);padding-bottom:calc(var(--mobile-safe-bottom) + 24px);gap:16px}
+ .login-motto{font-size:28px}
+ .login-form-wrap{padding-top:15px;padding-bottom:15px}
+}
+
+/* Landscape Android tablets still need safe areas and touch controls, without changing Windows. */
+:root[data-platform=android] .planner-app>.titlebar,:root[data-platform=android] .login-page>.titlebar{display:none}
+@media(min-width:761px){
+ :root[data-platform=android] .month-desk{height:100dvh;padding-top:max(8px,env(safe-area-inset-top,0px));padding-bottom:max(18px,env(safe-area-inset-bottom,0px));padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+ :root[data-platform=android] .month-card-grid{overflow:auto;overscroll-behavior:contain}
+ :root[data-platform=android] .planner-header-actions>.icon-button,:root[data-platform=android] .month-navigation .icon-button{width:44px;height:44px}
+ :root[data-platform=android] .day-card-dialog{width:min(980px,calc(100vw - 48px));height:min(650px,calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px));max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 32px);aspect-ratio:auto}
+}
+
+/* A landscape keyboard can leave less room than the header and draft together. */
+@media(max-height:300px){
+ :root[data-platform=android] .day-card-dialog{overflow-y:auto;overscroll-behavior:contain;scroll-padding-block:66px 12px}
+ :root[data-platform=android] .day-card-dialog[open]{display:block}
+ :root[data-platform=android] .day-card-header{position:sticky;top:0;z-index:2;background:var(--paper);padding:8px 14px;border-radius:13px 13px 0 0}
+ :root[data-platform=android] .day-card-date h2{width:38px;height:38px;font-size:27px;border-radius:9px}
+ :root[data-platform=android] .day-card-date p{font-size:11px;margin-bottom:3px}
+ :root[data-platform=android] .day-card-date strong{font-size:14px}
+ :root[data-platform=android] .day-close{width:40px;height:40px}
+ :root[data-platform=android] .day-card-body{overflow:visible;padding:5px 14px 0}
+ :root[data-platform=android] .day-card-footer{padding:8px 14px}
+ :root[data-platform=android] .day-add{width:40px;height:40px;border-radius:11px}
+}
+
+@media(hover:none){
+ .date-card:hover,.date-card.is-today:hover{transform:none;box-shadow:2px 2px 0 var(--shadow)}
+ .date-card.is-today:hover{box-shadow:2px 2px 0 var(--ink)}
+ .todo-check:hover,.planner-avatar:hover,.avatar-options>button:hover{transform:none}
+}

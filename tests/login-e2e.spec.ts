@@ -27,9 +27,16 @@ test('login hides planner data, rejects an incorrect password and keeps its mead
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   const form=await page.locator('.login-form-pane').boundingBox();
   expect(form!.x+form!.width/2).toBeCloseTo(width/2,0);
-  // The illustrated bears end above 41%, and the notebook begins below 82%.
-  expect(form!.y).toBeGreaterThan(height*.41);
-  expect(form!.y+form!.height).toBeLessThan(height*.82);
+  if(width>760){
+   // Desktop controls stay between the bears and the notebook.
+   expect(form!.y).toBeGreaterThan(height*.41);
+   expect(form!.y+form!.height).toBeLessThan(height*.82);
+  }else{
+   const motto=await page.locator('.login-motto').boundingBox();
+   expect(form!.y).toBeGreaterThan(motto!.y+motto!.height);
+   expect(form!.y+form!.height).toBeLessThanOrEqual(height);
+   await expect(page.getByRole('button',{name:'登录',exact:true})).toBeInViewport();
+  }
   await expect(artwork).toBeVisible();
   await page.screenshot({path});
  }
