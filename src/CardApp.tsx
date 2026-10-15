@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRight,Check,ChevronLeft,ChevronRight,Cloud,CloudOff,LoaderCircle,RefreshCw,Search,Settings as SettingsIcon} from 'lucide-react';
 import Settings from './components/Settings';
 import Modal from './components/Modal';
@@ -31,7 +31,7 @@ export default function CardApp({onLogout,username='',initialNotice=''}:{onLogou
  const byDay=useMemo(()=>{const map=new Map<string,PlannerItem[]>();for(const item of planner.active){const list=map.get(item.date)||[];list.push(item);map.set(item.date,list);}for(const list of map.values())list.sort(taskOrder);return map;},[planner.active]);
  const results=useMemo(()=>planner.active.filter(item=>item.title.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())).sort((a,b)=>b.date.localeCompare(a.date)),[planner.active,query]);
  const openDay=(day:string,element?:HTMLElement)=>{const box=element?.getBoundingClientRect();setOpened({day,origin:box?{left:box.left,top:box.top,width:box.width,height:box.height}:undefined});};
- useEffect(()=>{const listener=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'&&!settings&&!avatarOpen&&!opened){event.preventDefault();setSearchOpen(true);}};window.addEventListener('keydown',listener);return()=>window.removeEventListener('keydown',listener);},[settings,avatarOpen,opened]);
+ useLayoutEffect(()=>{const listener=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'&&!settings&&!avatarOpen&&!opened){event.preventDefault();setSearchOpen(true);}};window.addEventListener('keydown',listener);return()=>window.removeEventListener('keydown',listener);},[settings,avatarOpen,opened]);
  if(planner.bootError)return <div className="recovery"><CloudOff size={38}/><h1>{t("先保管好你的记录。")}</h1><p>{t(planner.bootError)}</p><button className="primary-button" onClick={async()=>{setRecoveryError('');try{await downloadText(rawBackup(),'冲冲冲-原始数据备份.json');}catch(error){setRecoveryError(error instanceof Error?error.message:String(error));}}}>{t("导出原始数据")}</button>{recoveryError&&<p role="alert">{t(recoveryError)}</p>}</div>;
  const error=planner.storageError||planner.syncError,synced=planner.syncStatus.startsWith('已同步')&&!planner.syncing&&!planner.syncError&&!planner.data.pending.length&&!avatar.pending;
  return <div className="app-shell planner-app"><div className="titlebar" aria-hidden="true"/>
