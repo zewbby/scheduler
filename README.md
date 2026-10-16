@@ -2,11 +2,11 @@
 
 ## 作用
 
-个人卡片式日程本。按月查看每天的卡片，点击日期展开当天待办。新增时选择时间，待办按时间从早到晚排列；完成后显示绿色对勾，文字变淡并加删除线。支持离线保存、Cloudflare 同步、搜索和备份，当前保留单账号使用。
+个人日程本。支持离线保存、Cloudflare 同步、搜索和备份，当前保留单账号使用。
 
 ## 技术栈
 
-React、TypeScript、Vite、Electron、Capacitor、SVG。Windows 与 Android 共享日程界面、数据模型和同步协议。
+React、TypeScript、Vite、Electron、Capacitor、SVG。
 
 ## 安装包
 
